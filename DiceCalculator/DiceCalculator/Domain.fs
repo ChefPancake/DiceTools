@@ -1,12 +1,20 @@
 ﻿namespace DiceCalculator
 
 module internal Domain =
-    type NonEmptyList<'a> = private NonEmptyList of 'a list
+    type PositiveInt = private PositiveInt of int
+    module PositiveInt =
+        let Create value =
+            match value with
+            | x when x < 0 -> Error "Value cannot be negative"
+            | x -> PositiveInt x |> Ok
+        let Value (PositiveInt value) = value
+        let Zero = PositiveInt 0
 
+    type NonEmptyList<'a> = private NonEmptyList of 'a list
     module NonEmptyList =
         let Create items =
-            match List.length items with
-            | 0 -> Error "Cannot create NonEmptyList with 0 items"
+            match items with
+            | [] -> Error "Cannot create NonEmptyList with 0 items"
             | _ -> NonEmptyList items |> Ok
         let Value (NonEmptyList items) = items
         let map f (NonEmptyList items) =
@@ -32,6 +40,16 @@ module internal Domain =
             | x -> NonEmptyList x |> Some
         let length (NonEmptyList items) =
             List.length items
+        let lengthPositive (NonEmptyList items) = 
+            List.length items |> PositiveInt
+        let choose chooser (NonEmptyList items) =
+            match List.choose chooser items with
+            | [] -> None
+            | chosen -> NonEmptyList chosen |> Some
+        let filter chooser (NonEmptyList items) = 
+            match List.filter chooser items with
+            | [] -> None
+            | chosen -> NonEmptyList chosen |> Some
 
     type NonEmptyString100 = private NonEmptyString100 of string
     module NonEmptyString100 = 
@@ -64,3 +82,17 @@ module internal Domain =
     type RollResults = {
         Rolls: NonEmptyList<Roll>  
     }
+
+    type HitThreshold =
+    | Exactly of PositiveInt
+    | AtLeast of PositiveInt
+    | AtMost of PositiveInt
+
+    type Odds = {
+        Successes: PositiveInt
+        Attempts: PositiveInt
+    }
+    
+
+
+    
