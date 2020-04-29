@@ -6,7 +6,7 @@ open DiceCalculator.Domain
 open DiceCalculator.Rolls
 
 [<TestClass>]
-type TestClass () =
+type RollTests () =
 
     let UnwrapOrFail res =
         match res with 
@@ -110,4 +110,36 @@ type TestClass () =
         //assert
         Assert.AreEqual(4, PositiveInt.Value odds.Attempts)
         Assert.AreEqual(3, PositiveInt.Value odds.Successes)
+
+    [<TestMethod>]
+    member this.CompareDiceTwoSides () =
+        //assemble
+        let symString = NonEmptyString100.Create "Pip" |> UnwrapOrFail
+        let sym = Symbol symString
+        let sides = 
+            [ { DieSide.Symbols = None }; { DieSide.Symbols = NonEmptyList.singleton sym |> Some } ] 
+            |> NonEmptyList.Create
+            |> UnwrapOrFail
+        let dicePool1 = 
+            [ { Die.Sides = sides}; { Die.Sides = sides} ]
+            |> NonEmptyList.Create
+            |> UnwrapOrFail
+            |> (fun x -> {DicePool.Dice = x })
+        let dicePool2 = 
+            [ { Die.Sides = sides}; { Die.Sides = sides} ]
+            |> NonEmptyList.Create
+            |> UnwrapOrFail
+            |> (fun x -> {DicePool.Dice = x })
+        let roll1 = RollDice dicePool1
+        let roll2 = RollDice dicePool2
+
+        //action
+        let compareOdds = OddsAgainstRoll sym roll1 roll2
+
+        //assert
+        Assert.AreEqual(16, PositiveInt.Value compareOdds.TotalCompares)
+        Assert.AreEqual(6, PositiveInt.Value compareOdds.Ties)
+        Assert.AreEqual(5, PositiveInt.Value compareOdds.Wins)
+        Assert.AreEqual(5, PositiveInt.Value compareOdds.Losses)
+        
 

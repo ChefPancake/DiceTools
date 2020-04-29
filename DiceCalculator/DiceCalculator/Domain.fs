@@ -88,9 +88,16 @@ module internal Domain =
     | AtLeast of PositiveInt
     | AtMost of PositiveInt
 
-    type Odds = {
+    type OddsOfHits = {
         Successes: PositiveInt
         Attempts: PositiveInt
+    }
+
+    type OddsAgainstDie = {
+        Wins: PositiveInt
+        Losses: PositiveInt
+        Ties: PositiveInt
+        TotalCompares: PositiveInt
     }
     
 

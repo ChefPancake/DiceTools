@@ -12,10 +12,9 @@ module internal Rolls =
 
     let RollDice (dicePool: DicePool): RollResults =
         let start = 
-            NonEmptyList.map 
-                NonEmptyList.singleton 
-                (NonEmptyList.head dicePool.Dice
-                |> (fun x -> x.Sides))
+            NonEmptyList.head dicePool.Dice
+            |> (fun x -> x.Sides)
+            |> NonEmptyList.map NonEmptyList.singleton
 
         let toRoll x = {Roll.Sides = x}
         let toRollResults x = {RollResults.Rolls = x}
@@ -34,8 +33,7 @@ module internal Rolls =
             |> NonEmptyList.map toRoll
             |> toRollResults
 
-    let OddsOfSymbol (symbol: Symbol) (threshold: HitThreshold) (rollResults: RollResults) =
-        let attempts = NonEmptyList.lengthPositive rollResults.Rolls
+    let private SymbolTotals symbol rollResults =
         let countSymbols (sym:Symbol) (side:DieSide) =
             match side.Symbols with
             | None -> 0
@@ -50,9 +48,17 @@ module internal Rolls =
                 (fun (x:DieSide) -> countSymbols symbol x )
                 roll.Sides
             |> NonEmptyList.fold (+) 0
+
+        rollResults.Rolls
+        |> NonEmptyList.map countRoll
+
+
+    let OddsOfSymbol (symbol: Symbol) (threshold: HitThreshold) (rollResults: RollResults) =
+        let attempts = NonEmptyList.lengthPositive rollResults.Rolls
         let totals =
-            rollResults.Rolls
-            |> NonEmptyList.map countRoll
+            SymbolTotals
+                symbol
+                rollResults
         let selector = 
             match threshold with
             | HitThreshold.Exactly ex -> 
@@ -70,3 +76,50 @@ module internal Rolls =
             Attempts = attempts
             Successes = successes
         }
+
+    type private WinsLosses =
+    | Win
+    | Tie
+    | Loss
+
+    let OddsAgainstRoll symbol roll1 roll2 =
+        let roll1Totals =
+            SymbolTotals
+                symbol
+                roll1
+        let roll2Totals =
+            SymbolTotals
+                symbol
+                roll2
+        let overall =
+            roll1Totals
+            |> NonEmptyList.collect(fun x -> 
+                roll2Totals
+                |> NonEmptyList.map(fun y -> 
+                    match x with
+                    | z when z > y -> Win
+                    | z when z < y -> Loss
+                    | _ -> Tie))
+        let attempts = 
+            NonEmptyList.lengthPositive overall
+        let wins = 
+            match NonEmptyList.filter (fun x -> x = Win) overall with
+            | Some w -> NonEmptyList.lengthPositive w
+            | None -> PositiveInt.Zero
+        let losses = 
+            match NonEmptyList.filter (fun x -> x = Loss) overall with
+            | Some w -> NonEmptyList.lengthPositive w
+            | None -> PositiveInt.Zero
+        let ties = 
+            match NonEmptyList.filter (fun x -> x = Tie) overall with
+            | Some w -> NonEmptyList.lengthPositive w
+            | None -> PositiveInt.Zero
+        {
+            Wins = wins
+            Losses = losses
+            Ties = ties
+            TotalCompares = attempts
+        }
+
+        
+
