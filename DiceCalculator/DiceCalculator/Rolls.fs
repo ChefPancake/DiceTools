@@ -82,14 +82,14 @@ module internal Rolls =
     | Tie
     | Loss
 
-    let OddsAgainstRoll symbol roll1 roll2 =
+    let OddsAgainstRoll symbol1 roll1 symbol2 roll2 =
         let roll1Totals =
             SymbolTotals
-                symbol
+                symbol1
                 roll1
         let roll2Totals =
             SymbolTotals
-                symbol
+                symbol2
                 roll2
         let overall =
             roll1Totals

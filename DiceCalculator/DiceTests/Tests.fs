@@ -134,7 +134,7 @@ type RollTests () =
         let roll2 = RollDice dicePool2
 
         //action
-        let compareOdds = OddsAgainstRoll sym roll1 roll2
+        let compareOdds = OddsAgainstRoll sym roll1 sym roll2
 
         //assert
         Assert.AreEqual(16, PositiveInt.Value compareOdds.TotalCompares)
