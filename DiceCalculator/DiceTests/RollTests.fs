@@ -2,7 +2,7 @@ namespace DiceTests
 
 open System
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open DiceCalculator.Domain
+open DiceCalculator.Domain.Core
 open DiceCalculator.Rolls
 
 [<TestClass>]
@@ -12,7 +12,6 @@ type RollTests () =
         match res with 
         | Ok x -> x
         | Error err -> failwith err
-
 
     [<TestMethod>]
     member this.SingleDieRolled () =

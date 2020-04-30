@@ -58,6 +58,7 @@ module Core =
             | 0 -> Error "String cannot be empty"
             | x when x > 100 -> Error "String cannot exceed 100 characters"
             | _ -> NonEmptyString100 str |> Ok
+        let Value (NonEmptyString100 value) = value
 
     type Symbol = Symbol of NonEmptyString100
     module Symbol =
