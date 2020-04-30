@@ -1,6 +1,6 @@
-﻿namespace DiceCalculator
+﻿namespace DiceCalculator.Domain
 
-module internal Domain =
+module Core =
     type PositiveInt = private PositiveInt of int
     module PositiveInt =
         let Create value =
