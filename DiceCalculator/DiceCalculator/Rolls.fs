@@ -1,7 +1,7 @@
 ﻿namespace DiceCalculator
-open Domain
+open DiceCalculator.Domain.Core
 
-module internal Rolls =
+module Rolls =
     let private Cartesian xs ys = 
         xs 
         |> NonEmptyList.collect (fun x -> 

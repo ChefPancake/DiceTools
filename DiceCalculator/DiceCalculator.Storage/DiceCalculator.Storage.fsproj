@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>DiceCalculator.Storage</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Rolls.fs" />
-    <Compile Include="Library.fs" />
+    <Compile Include="Profile.fs" />
   </ItemGroup>
 
   <ItemGroup>
