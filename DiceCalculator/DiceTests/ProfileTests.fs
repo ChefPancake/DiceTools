@@ -29,9 +29,9 @@ type ProfileTests () =
                 "[[];[];[Pip1,Pip1];[Pip2]]"
                 ""
             ]
+        let name = NonEmptyString100.Create "ProfileName" |> UnwrapOrFail
 
         //action
-        let name = NonEmptyString100.Create "ProfileName" |> UnwrapOrFail
         let profile = LoadProfileFromText name profileStrings |> UnwrapOrFail
 
         //assert

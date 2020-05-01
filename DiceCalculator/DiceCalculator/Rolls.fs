@@ -2,10 +2,6 @@
 open DiceCalculator.Domain.Core
 
 module Rolls =
-
-    type DicePool = {
-        Dice: NonEmptyList<Die>
-    }
     
     type Roll = {
         Sides: NonEmptyList<DieSide>

@@ -74,6 +74,9 @@ module Core =
         Sides: NonEmptyList<DieSide>
     }
     
+    type DicePool = {
+        Dice: NonEmptyList<Die>
+    }
 
 
     
