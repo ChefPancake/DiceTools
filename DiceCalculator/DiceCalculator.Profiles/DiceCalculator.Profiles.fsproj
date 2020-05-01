@@ -2,11 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <AssemblyName>DiceCalculator.Storage</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="FileIO.fs" />
+    <Compile Include="Profile.fs" />
   </ItemGroup>
 
   <ItemGroup>

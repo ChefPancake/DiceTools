@@ -1,20 +1,10 @@
-namespace DiceCalculator.Storage
+namespace DiceCalculator.Profiles
+
 open DiceCalculator.Domain.Core
 open System
 open System.IO
 
 module Profile =
-    type FilePath = private FilePath of string
-    module FilePath =
-        let Create pathStr =
-            try
-                Path.GetFullPath pathStr
-                |> FilePath
-                |> Ok
-            with
-            | _ -> Error ("Unable to parse \"" + pathStr + "\" as filePath")
-        let Value (FilePath filePath) = filePath
-
     type NamedDie = {
         Name:NonEmptyString100
         Die: Die
@@ -25,18 +15,15 @@ module Profile =
         Symbols: Symbol list
         Dice: NamedDie list
     }
-        
-    let SaveProfileToDisk filepath diceProfile =
-        0
 
-    type ParsedSymbols = { 
+    type private ParsedSymbols = { 
         ParsedSymbols: Symbol list
     }
-    type ParsedSymbolsAndDice = {
+    type private ParsedSymbolsAndDice = {
         ParsedSymbols: Symbol list
         ParsedDice: NamedDie list
     }
-    type ParsedSymbolsAndDiceName = {
+    type private ParsedSymbolsAndDiceName = {
         ParsedSymbols: Symbol list
         ParsedDice: NamedDie list
         ParsedDieName: NonEmptyString100
@@ -170,64 +157,34 @@ module Profile =
                 |> ParserState.ReadingDiceName)
         | _ -> Error "Error parsing die"
 
-    let rec private ParseProfileFileAsync profileName (file:StreamReader) state =
-        async {
-            try 
-                let! line = 
-                    file.ReadLineAsync() 
-                    |> Async.AwaitTask
-                let trimmed = line.Trim()
-                let nextState =
-                    match state with
-                    | ReadingSymbolsHeader -> 
-                        ReadHeader trimmed
-                    | ReadingSymbols symbols -> 
-                        ReadSymbols trimmed symbols
-                    | ReadingDiceName symbolsAndDice -> 
-                        ReadDiceName trimmed symbolsAndDice profileName
-                    | ReadingDiceSides symbolsAndDiceName ->
-                        ReadDice trimmed symbolsAndDiceName
-                    | Complete _ ->
-                        Error "Invalid state"
-                return!
-                    match nextState with
-                    | Error err -> async { return Error err }
-                    | Ok next -> 
-                        match next with 
-                        | ParserState.Complete _ -> 
-                            async { return Ok next }
-                        | _ -> ParseProfileFileAsync profileName file next
-            with 
-            | ex -> 
-                return Error ex.Message
-        }
+    let private ParseNextState profileName state (line:string) =
+        let trimmed = line.Trim()
+        Result.bind (fun state -> 
+            match state with
+            | ReadingSymbolsHeader -> 
+                ReadHeader trimmed
+            | ReadingSymbols symbols -> 
+                ReadSymbols trimmed symbols
+            | ReadingDiceName symbolsAndDice -> 
+                ReadDiceName trimmed symbolsAndDice profileName
+            | ReadingDiceSides symbolsAndDiceName ->
+                ReadDice trimmed symbolsAndDiceName
+            | Complete _ ->
+                Error "Invalid state")
+            state
 
-    let LoadProfileFromDiskAsync filePath =
-        let rawPath = FilePath.Value filePath
-        match File.Exists rawPath with
-        | true ->
-            async {
-                let name = 
-                    Path.GetFileNameWithoutExtension rawPath 
-                    |> NonEmptyString100.Create
-
-                let parserStateToProfile state =
-                    match state with 
-                    | ParserState.Complete profile ->
-                        Ok profile
-                    | _ -> 
-                        Error "Failed to parse file. Attempt to parse returned invalid state"
-
-                match name with
-                | Ok name ->
-                    use file = File.OpenText rawPath
-                    let! parseResult = ParseProfileFileAsync name file ReadingSymbolsHeader
-                    return Result.bind parserStateToProfile parseResult                    
-                | Error err -> return Error err                 
-            }
-        | false -> 
-            async { return Error "File does not exist" }
-
+    let LoadProfileFromText profileName (text:string list) =
+        let parserStateToProfile state =
+            match state with 
+            | ParserState.Complete profile ->
+                Ok profile
+            | _ -> 
+                Error "Failed to parse file. Attempt to parse returned invalid state"
+        List.fold
+            (ParseNextState profileName)
+            (Ok ReadingSymbolsHeader)
+            text
+        |> Result.bind parserStateToProfile
 
 
 

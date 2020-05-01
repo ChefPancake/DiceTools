@@ -1,5 +1,7 @@
 ﻿namespace DiceCalculator.Domain
 
+open System.IO
+
 module Core =
     type PositiveInt = private PositiveInt of int
     module PositiveInt =
