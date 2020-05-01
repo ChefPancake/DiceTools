@@ -11,6 +11,8 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "DiceCalculator.Storage", "D
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "DiceCalculator.Domain", "DiceCalculator.Domain\DiceCalculator.Domain.fsproj", "{D9E59629-C780-410D-8680-E78B0696757C}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DiceCalculator.Profiles", "DiceCalculator.Profiles\DiceCalculator.Profiles.fsproj", "{5E6A493F-7565-4D11-A60E-0DD316BEE1AD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{D9E59629-C780-410D-8680-E78B0696757C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D9E59629-C780-410D-8680-E78B0696757C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D9E59629-C780-410D-8680-E78B0696757C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E6A493F-7565-4D11-A60E-0DD316BEE1AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E6A493F-7565-4D11-A60E-0DD316BEE1AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E6A493F-7565-4D11-A60E-0DD316BEE1AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E6A493F-7565-4D11-A60E-0DD316BEE1AD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

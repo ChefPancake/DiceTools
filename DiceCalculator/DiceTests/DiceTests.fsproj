@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="StorageTests.fs" />
+    <Compile Include="ProfileTests.fs" />
     <Compile Include="RollTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DiceCalculator.Domain\DiceCalculator.Domain.fsproj" />
+    <ProjectReference Include="..\DiceCalculator.Profiles\DiceCalculator.Profiles.fsproj" />
     <ProjectReference Include="..\DiceCalculator.Storage\DiceCalculator.Storage.fsproj" />
     <ProjectReference Include="..\DiceCalculator\DiceCalculator.fsproj" />
   </ItemGroup>

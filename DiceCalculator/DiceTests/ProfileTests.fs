@@ -5,10 +5,10 @@ open System.IO
 open System.Text
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open DiceCalculator.Domain.Core
-open DiceCalculator.Storage.Profile
+open DiceCalculator.Profiles.Profile
 
 [<TestClass>]
-type StorageTests () =
+type ProfileTests () =
 
     let UnwrapOrFail res =
         match res with 
@@ -18,25 +18,21 @@ type StorageTests () =
     [<TestMethod>]
     member this.LoadProfile () =
         //assemble
-        let mutable stringBuilder=
-            new StringBuilder ()
-        stringBuilder <- stringBuilder.AppendLine "Symbols:"
-        stringBuilder <- stringBuilder.AppendLine " Pip1"
-        stringBuilder <- stringBuilder.AppendLine " Pip2"
-        stringBuilder <- stringBuilder.AppendLine ""
-        stringBuilder <- stringBuilder.AppendLine "Dice:"
-        stringBuilder <- stringBuilder.AppendLine "Die1"
-        stringBuilder <- stringBuilder.AppendLine "[[];[];[Pip1,Pip1];[Pip2]]"
-        stringBuilder <- stringBuilder.AppendLine ""
-
-        let dirPath = "C://Tests//"
-        let filePath = Path.Combine (dirPath, "TestProfile.dcp")
-        Directory.CreateDirectory dirPath |> ignore
-        File.WriteAllText (filePath, stringBuilder.ToString())
+        let profileStrings =
+            [
+                "Symbols:"
+                " Pip1"
+                " Pip2"
+                ""
+                "Dice:"
+                "Die1"
+                "[[];[];[Pip1,Pip1];[Pip2]]"
+                ""
+            ]
 
         //action
-        let filePath = FilePath.Create filePath |> UnwrapOrFail
-        let profile = LoadProfileFromDiskAsync filePath |> Async.RunSynchronously |> UnwrapOrFail
+        let name = NonEmptyString100.Create "ProfileName" |> UnwrapOrFail
+        let profile = LoadProfileFromText name profileStrings |> UnwrapOrFail
 
         //assert
         let pip1 = 
