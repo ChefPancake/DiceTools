@@ -73,35 +73,6 @@ module Core =
     type Die = {
         Sides: NonEmptyList<DieSide>
     }
-
-    type DicePool = {
-        Dice: NonEmptyList<Die>
-    }
-    
-    type Roll = {
-        Sides: NonEmptyList<DieSide>
-    }
-
-    type RollResults = {
-        Rolls: NonEmptyList<Roll>  
-    }
-
-    type HitThreshold =
-    | Exactly of PositiveInt
-    | AtLeast of PositiveInt
-    | AtMost of PositiveInt
-
-    type OddsOfHits = {
-        Successes: PositiveInt
-        Attempts: PositiveInt
-    }
-
-    type OddsAgainstDie = {
-        Wins: PositiveInt
-        Losses: PositiveInt
-        Ties: PositiveInt
-        TotalCompares: PositiveInt
-    }
     
 
 
