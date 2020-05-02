@@ -78,5 +78,9 @@ module Core =
         Dice: NonEmptyList<Die>
     }
 
+    type HitThreshold =
+        | Exactly of PositiveInt
+        | AtLeast of PositiveInt
+        | AtMost of PositiveInt
 
     

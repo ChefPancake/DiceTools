@@ -27,6 +27,12 @@ type ProfileTests () =
                 "Dice:"
                 "Die1"
                 "[[];[];[Pip1,Pip1];[Pip2]]"
+                "Die2"
+                "[[];[];[Pip1,Pip2];[Pip1,Pip2]]"
+                ""
+                "Tests:"
+                "[Die1][=2]"
+                "[Die1,Die1,Die2][Die1,Die1]"
                 ""
             ]
         let name = NonEmptyString100.Create "ProfileName" |> UnwrapOrFail

@@ -11,11 +11,6 @@ module Rolls =
         Rolls: NonEmptyList<Roll>  
     }
 
-    type HitThreshold =
-    | Exactly of PositiveInt
-    | AtLeast of PositiveInt
-    | AtMost of PositiveInt
-
     type OddsOfHits = {
         Successes: PositiveInt
         Attempts: PositiveInt
