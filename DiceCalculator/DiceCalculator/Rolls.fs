@@ -2,10 +2,6 @@
 open DiceCalculator.Domain.Core
 
 module Rolls =
-
-    type DicePool = {
-        Dice: NonEmptyList<Die>
-    }
     
     type Roll = {
         Sides: NonEmptyList<DieSide>
@@ -14,11 +10,6 @@ module Rolls =
     type RollResults = {
         Rolls: NonEmptyList<Roll>  
     }
-
-    type HitThreshold =
-    | Exactly of PositiveInt
-    | AtLeast of PositiveInt
-    | AtMost of PositiveInt
 
     type OddsOfHits = {
         Successes: PositiveInt

@@ -33,13 +33,30 @@ module FileIO =
 
     let ReadLinesFromFileAsync filePath cancel =
         async {
-            let rawPath = FilePath.Value filePath
-            match File.Exists rawPath with
-            | true ->
-                let! lines =
-                    File.ReadAllLinesAsync(rawPath, cancel)
-                    |> Async.AwaitTask 
-                return Ok lines
-            | false -> 
-                return Error "File does not exist" 
+            try 
+                let rawPath = FilePath.Value filePath
+                match File.Exists rawPath with
+                | true ->
+                    let! lines =
+                        File.ReadAllLinesAsync(rawPath, cancel)
+                        |> Async.AwaitTask 
+                    return Ok lines
+                | false -> 
+                    return Error "File does not exist" 
+            with 
+            | ex -> return Error ("Failed to read files from file:" + ex.Message)    
+        }
+
+    let SaveLinesToFileAsync filePath lines cancel =
+        async {
+            try 
+                let rawPath = FilePath.Value filePath
+                Path.GetDirectoryName rawPath
+                |> Directory.CreateDirectory
+                |> ignore
+                do! File.WriteAllLinesAsync(rawPath, lines, cancel)
+                    |> Async.AwaitTask
+                return Ok ()
+            with 
+            | ex -> return Error ("Failed to save text to file:" + ex.Message)    
         }

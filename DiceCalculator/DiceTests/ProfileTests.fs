@@ -27,11 +27,17 @@ type ProfileTests () =
                 "Dice:"
                 "Die1"
                 "[[];[];[Pip1,Pip1];[Pip2]]"
+                "Die2"
+                "[[];[];[Pip1,Pip2];[Pip1,Pip2]]"
+                ""
+                "Tests:"
+                "[[Die1];Pip1]v[=2]"
+                "[[Die1,Die1,Die2];Pip2]v[[Die1,Die1];Pip1]"
                 ""
             ]
+        let name = NonEmptyString100.Create "ProfileName" |> UnwrapOrFail
 
         //action
-        let name = NonEmptyString100.Create "ProfileName" |> UnwrapOrFail
         let profile = LoadProfileFromText name profileStrings |> UnwrapOrFail
 
         //assert
@@ -67,6 +73,19 @@ type ProfileTests () =
             match sideOption with
             | Some side -> side.Symbols
             | None -> None
+        let test1 =
+            List.head profile.Tests
+        let test2 = 
+            List.tail profile.Tests
+            |> List.head
+
+        let testFirstDicePool test =
+            let unwrap (NamedDicePool pool) = pool
+            match test with
+            | DiceVDice dvd ->
+                unwrap dvd.DicePool1
+            | DiceVThreshold dvt ->
+                unwrap dvt.DicePool
 
         Assert.AreEqual ("Pip1", pip1)
         Assert.AreEqual ("Pip2", pip2)
@@ -78,6 +97,10 @@ type ProfileTests () =
         Assert.AreEqual (Some "Pip1", selectSymbols side3 |> Option.map (NonEmptyList.head >> Symbol.Value >> NonEmptyString100.Value))
         Assert.AreEqual (Some 1, selectSymbols side4 |> Option.map NonEmptyList.length)
         Assert.AreEqual (Some "Pip2", selectSymbols side4 |> Option.map (NonEmptyList.head >> Symbol.Value >> NonEmptyString100.Value))
+        Assert.AreEqual (1, testFirstDicePool test1 |> List.length )
+        Assert.AreEqual (3, testFirstDicePool test2 |> List.length )
+
+
 
 
 
