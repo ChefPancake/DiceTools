@@ -11,6 +11,14 @@ module Profile =
     }
 
     type NamedDicePool = NamedDicePool of NamedDie list
+    module NamedDicePool = 
+        let ToDicePool (NamedDicePool named) =
+            let getDie (namedDie:NamedDie) = namedDie.Die
+            let toDicePool (dice:NonEmptyList<Die>) =
+                { DicePool.Dice = dice }
+            List.map getDie named
+            |> NonEmptyList.Create
+            |> Result.map toDicePool
 
     type DiceVDice = {
         DicePool1: NamedDicePool
@@ -347,8 +355,9 @@ module Profile =
                 ReadDice trimmed symbolsAndDiceName
             | ReadingTests symbolsDiceAndTests ->
                 ReadTest trimmed symbolsDiceAndTests profileName
-            | Complete _ ->
-                Error "Invalid state")
+            | Complete complete ->
+                Complete complete 
+                |> Ok)
             state
 
     let LoadProfileFromText profileName (text:string list) =

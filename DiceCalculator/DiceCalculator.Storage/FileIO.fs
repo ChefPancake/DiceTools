@@ -31,7 +31,7 @@ module FileIO =
                 Error ("Failed to parse filename: " + ex.Message)
         let Value (FileName fileName) = fileName
 
-    let ReadLinesFromFileAsync filePath cancel =
+    let ReadLinesFromFileAsync cancel filePath =
         async {
             try 
                 let rawPath = FilePath.Value filePath
@@ -47,7 +47,7 @@ module FileIO =
             | ex -> return Error ("Failed to read files from file:" + ex.Message)    
         }
 
-    let SaveLinesToFileAsync filePath lines cancel =
+    let SaveLinesToFileAsync cancel lines filePath =
         async {
             try 
                 let rawPath = FilePath.Value filePath

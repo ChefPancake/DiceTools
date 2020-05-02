@@ -34,6 +34,8 @@ type ProfileTests () =
                 "[[Die1];Pip1]v[=2]"
                 "[[Die1,Die1,Die2];Pip2]v[[Die1,Die1];Pip1]"
                 ""
+                ""
+                ""
             ]
         let name = NonEmptyString100.Create "ProfileName" |> UnwrapOrFail
 
