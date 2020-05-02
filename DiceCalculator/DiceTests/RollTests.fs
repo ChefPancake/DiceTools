@@ -3,7 +3,7 @@ namespace DiceTests
 open System
 open Microsoft.VisualStudio.TestTools.UnitTesting
 open DiceCalculator.Domain.Core
-open DiceCalculator.Rolls
+open DiceCalculator.Rolls.DiceRolls
 
 [<TestClass>]
 type RollTests () =

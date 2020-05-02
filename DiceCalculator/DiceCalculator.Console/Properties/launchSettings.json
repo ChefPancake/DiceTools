@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DiceCalculator.Console": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Users\\kenda\\Documents\\ProfileTest.dcp\""
+    }
+  }
+}

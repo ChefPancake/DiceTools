@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28803.452
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "DiceCalculator", "DiceCalculator\DiceCalculator.fsproj", "{D3B1DC6D-E956-4FF6-ADD8-EDD9DA86EC17}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "DiceCalculator.Rolls", "DiceCalculator.Rolls\DiceCalculator.Rolls.fsproj", "{D3B1DC6D-E956-4FF6-ADD8-EDD9DA86EC17}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "DiceTests", "DiceTests\DiceTests.fsproj", "{7003E894-844D-40FE-B9C0-CC1E49837230}"
 EndProject
@@ -11,7 +11,9 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "DiceCalculator.Storage", "D
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "DiceCalculator.Domain", "DiceCalculator.Domain\DiceCalculator.Domain.fsproj", "{D9E59629-C780-410D-8680-E78B0696757C}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DiceCalculator.Profiles", "DiceCalculator.Profiles\DiceCalculator.Profiles.fsproj", "{5E6A493F-7565-4D11-A60E-0DD316BEE1AD}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "DiceCalculator.Profiles", "DiceCalculator.Profiles\DiceCalculator.Profiles.fsproj", "{5E6A493F-7565-4D11-A60E-0DD316BEE1AD}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DiceCalculator.Console", "DiceCalculator.Console\DiceCalculator.Console.fsproj", "{543F8A95-E13C-463D-B34A-E28576E586E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{5E6A493F-7565-4D11-A60E-0DD316BEE1AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E6A493F-7565-4D11-A60E-0DD316BEE1AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5E6A493F-7565-4D11-A60E-0DD316BEE1AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{543F8A95-E13C-463D-B34A-E28576E586E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{543F8A95-E13C-463D-B34A-E28576E586E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{543F8A95-E13C-463D-B34A-E28576E586E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{543F8A95-E13C-463D-B34A-E28576E586E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

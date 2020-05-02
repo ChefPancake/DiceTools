@@ -1,7 +1,7 @@
-﻿namespace DiceCalculator
+﻿namespace DiceCalculator.Rolls
 open DiceCalculator.Domain.Core
 
-module Rolls =
+module DiceRolls =
     
     type Roll = {
         Sides: NonEmptyList<DieSide>
