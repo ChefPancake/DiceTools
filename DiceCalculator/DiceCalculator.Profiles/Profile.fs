@@ -12,17 +12,16 @@ module Profile =
 
     type NamedDicePool = NamedDicePool of NamedDie list
 
-    //TODO: add target symbols
     type DiceVDice = {
         DicePool1: NamedDicePool
-        //TargetSymbol1: Symbol
+        TargetSymbol1: Symbol
         DicePool2: NamedDicePool
-        //TargetSymbol2: Symbol
+        TargetSymbol2: Symbol
     }
 
     type DiceVThreshold = {
         DicePool: NamedDicePool
-        //TargetSymbol: Symbol
+        TargetSymbol: Symbol
         Threshold: HitThreshold
     }
 
@@ -95,17 +94,19 @@ module Profile =
                 }
                 |> ReadingSymbols)
 
-    let private ReadDiceName (line:string) (symbolsAndDice: ParsedSymbolsAndDice) profileName =
+    let private ReadDiceName (line:string) (symbolsAndDice: ParsedSymbolsAndDice) =
         match line with
         | x when x.StartsWith '[' ->
             Error "Missing dice name while parsing"
         | x when String.IsNullOrWhiteSpace x ->
+            ParserState.ReadingDiceName symbolsAndDice |> Ok
+        | x when x = "Tests:" ->
             {
-                DiceProfile.Name = profileName
-                DiceProfile.Dice = symbolsAndDice.ParsedDice
-                DiceProfile.Symbols = symbolsAndDice.ParsedSymbols
+                ParsedSymbolsDiceAndTests.ParsedDice = symbolsAndDice.ParsedDice
+                ParsedSymbolsDiceAndTests.ParsedSymbols = symbolsAndDice.ParsedSymbols
+                ParsedSymbolsDiceAndTests.ParsedTests = []
             } 
-            |> ParserState.Complete
+            |> ParserState.ReadingTests
             |> Ok
         | x ->
             NonEmptyString100.Create x
@@ -115,7 +116,7 @@ module Profile =
                 ParsedSymbols = symbolsAndDice.ParsedSymbols
                 ParsedDice = symbolsAndDice.ParsedDice
             }
-            |> ReadingDiceSides)
+            |> ParserState.ReadingDiceSides)
 
     //TODO: clean this guy up
     let private ReadDice (line:string) symbolsAndDiceName =
@@ -199,126 +200,138 @@ module Profile =
     let private TryParseAsInt (intString:string) =
         let mutable parsed = -1
         match Int32.TryParse (intString, &parsed) with
-        | true -> Some parsed
-        | false -> None
+        | true -> Ok parsed
+        | false -> Error ("Unable to parse " + intString + " as Int32" )
 
-    let private ReadTest (line:string) (symbolsDiceAndTests:ParsedSymbolsDiceAndTests) =
+    let private CheckAndSelectDie diceList nameText =
+        let selectDie (item:NonEmptyString100) =
+            let matches = 
+                List.filter
+                    (fun (x:NamedDie) -> x.Name = item)
+                    diceList
+            match List.length matches with  
+            | 1 -> List.head matches |> Ok
+            | 0 -> Error ("Die named " + (NonEmptyString100.Value item) + " does not match existing definitions")
+            | _ -> Error ("Die list contains more than one entry with name " + (NonEmptyString100.Value item))
+        NonEmptyString100.Create nameText
+        |> Result.bind selectDie
+
+    let private TryParseThreshold (chars: char []) =
+        let stringToThreshold (chars: char []) thresholdVariant =
+            let intParse = chars |> System.String
+            TryParseAsInt intParse
+            |> Result.bind PositiveInt.Create
+            |> Result.map thresholdVariant
+        match (chars.[0], chars.[1]) with
+        | ('=',_) ->
+            stringToThreshold chars.[1..] HitThreshold.Exactly
+        | ('<','=') ->
+            stringToThreshold chars.[2..] HitThreshold.AtMost
+        | ('>','=') ->
+            stringToThreshold chars.[2..] HitThreshold.AtLeast
+        | (_,_) -> Error "Invalid threshold value"
+
+    let private ParseDicePoolString (dice:NamedDie list) (str:string):Result<NamedDicePool, string> = 
+        let diceNames = str.Split(',')
+        match diceNames with
+        | [||] -> Error "Left side of test must contain at least one die in pool"
+        | _ -> 
+            Array.map
+                (CheckAndSelectDie dice)
+                diceNames
+            |> Array.toList
+            |> AllOrNoneResults
+            |> Result.map NamedDicePool       
+        
+    let private ParseSymbolString (symbols:Symbol list) (str:string):Result<Symbol, string> =
+        let symbolStrings = List.map Symbol.Value symbols
+        NonEmptyString100.Create str
+        |> Result.bind (fun x -> 
+            match List.contains x symbolStrings with 
+            | true -> Symbol x |> Ok 
+            | false -> Error "Unable to parse as targetSymbol")
+
+    let private ReadTest (line:string) (symbolsDiceAndTests:ParsedSymbolsDiceAndTests) profileName =
         match line with 
         | x when x.StartsWith '[' && x.EndsWith ']' ->
-            let split = x.Replace(" ", String.Empty).TrimStart('[').TrimEnd(']').Split("][")
+            let split = x.Replace(" ", String.Empty).TrimStart('[').TrimEnd(']').Split("]v[")
             match Array.length split = 2 with
             | false -> Error "Unable to parse dice test"
             | true -> 
-                //the left must always have two elements
-                let firstSplit = split.[0].Split(',')
-                
-                let selectDie (item:NonEmptyString100) =
-                    let matches = 
-                        List.filter
-                            (fun (x:NamedDie) -> x.Name = item)
-                            symbolsDiceAndTests.ParsedDice
-                    match List.length matches with  
-                    | 1 -> List.head matches |> Ok
-                    | 0 -> Error ("Die named " + (NonEmptyString100.Value item) + " does not match existing definitions")
-                    | _ -> Error ("Die list contains more than one entry with name " + (NonEmptyString100.Value item))
-                let checkAndSelectDie nameText =
-                    NonEmptyString100.Create nameText
-                    |> Result.bind selectDie
-                let firstSide =
-                    match firstSplit with
-                    | [||] -> Error "Left side of test must contain at least one dice pool"
-                    | _ -> 
-                        Array.map
-                            checkAndSelectDie
-                            firstSplit
-                        |> Array.toList
-                        |> AllOrNoneResults
-                        |> Result.map NamedDicePool                        
-                        
-                let secondSplit = split.[0].Split(',')
-                match Array.length secondSplit with
-                | 0 -> Error "Right side must have at least one item"
-                | 1 -> 
-                    let firstItem = secondSplit.[0]
-                    let chars = firstItem.ToCharArray()
-                    //attempt to parse as a threshold
-                    let threshold =
-                        match Array.length chars with
-                        | x when x < 2 -> None
-                        | _ ->
-                            match (chars.[0], chars.[1]) with
-                            | ('=',_) ->
-                                let intParse = chars.[1..].ToString()
-                                TryParseAsInt intParse
-                                |> Option.bind (fun int -> 
-                                    match PositiveInt.Create int with
-                                    | Ok pi -> Some pi
-                                    | Error _ -> None)
-                                |> Option.map HitThreshold.Exactly
-                            | ('<','=') ->
-                                let intParse = chars.[2..].ToString()
-                                TryParseAsInt intParse
-                                |> Option.bind (fun int ->
-                                    match PositiveInt.Create int with
-                                    | Ok pi -> Some pi
-                                    | Error _ -> None)
-                                |> Option.map HitThreshold.AtMost
-                            | ('>','=') ->
-                                let intParse = chars.[2..].ToString()
-                                TryParseAsInt intParse
-                                |> Option.bind (fun int ->
-                                    match PositiveInt.Create int with
-                                    | Ok pi -> Some pi
-                                    | Error _ -> None)
-                                |> Option.map HitThreshold.AtLeast
-                            | (_,_) -> None
-                    match threshold with 
-                    | Some thresh -> 
-                        let toAdd =
-                            Result.map (fun dice ->
+                let firstSplit = split.[0].Split(';')
+                let newTest = 
+                    match Array.length firstSplit with
+                    | 2 ->
+                        let trimmedFirstDice = (firstSplit.[0].TrimStart('[').TrimEnd(']'))
+                        let firstDice =
+                            ParseDicePoolString 
+                                symbolsDiceAndTests.ParsedDice 
+                                trimmedFirstDice
+                        let firstSymbol =   
+                            ParseSymbolString 
+                                symbolsDiceAndTests.ParsedSymbols 
+                                firstSplit.[1]
+                        match split.[1].Contains(';') with
+                        | false ->
+                            let threshold = 
+                                let chars = split.[1].ToCharArray()
+                                match Array.length chars with
+                                | _ -> TryParseThreshold chars
+                                | x when x < 2 -> Error "Invalid threshold value"
+
+                            match firstDice, firstSymbol, threshold with
+                            | Ok d1, Ok s1, Ok t ->
                                 {
-                                    DiceVThreshold.DicePool = dice
-                                    Threshold = thresh
+                                    DiceVThreshold.DicePool = d1
+                                    DiceVThreshold.TargetSymbol = s1
+                                    DiceVThreshold.Threshold = t
                                 }
                                 |> RollTest.DiceVThreshold
-                                |> List.singleton) 
-                                firstSide
-                        Result.map
-                            (fun threshAsList ->
+                                |> Ok
+                            | _,_,_ -> Error "Unable to parse test"
+                        | true ->
+                            let secondSplit = split.[1].Split(';')
+                            let trimmedSecondDice = (secondSplit.[0].TrimStart('[').TrimEnd(']'))
+                            let secondDice =
+                                ParseDicePoolString
+                                    symbolsDiceAndTests.ParsedDice
+                                    trimmedSecondDice
+                            let secondSymbol =
+                                ParseSymbolString
+                                    symbolsDiceAndTests.ParsedSymbols
+                                    secondSplit.[1]
+
+                            match firstDice, secondDice, firstSymbol, secondSymbol with
+                            | Ok d1, Ok d2, Ok s1, Ok s2 ->
                                 {
-                                    ParsedSymbolsDiceAndTests.ParsedDice = symbolsDiceAndTests.ParsedDice
-                                    ParsedSymbolsDiceAndTests.ParsedSymbols = symbolsDiceAndTests.ParsedSymbols
-                                    ParsedSymbolsDiceAndTests.ParsedTests = List.append symbolsDiceAndTests.ParsedTests threshAsList
+                                    DicePool1 = d1
+                                    DicePool2 = d2
+                                    TargetSymbol1 = s1
+                                    TargetSymbol2 = s2
                                 }
-                            )
-                            toAdd
-                    | None -> 
-                        checkAndSelectDie firstItem
-                        |> Result.bind (fun die -> 
-                            let secondPool = List.singleton die |> NamedDicePool
-                            let toAdd = 
-                                Result.map 
-                                    (fun dice ->
-                                        {
-                                            DiceVDice.DicePool1 = dice
-                                            DiceVDice.DicePool2 = secondPool
-                                        }
-                                        |> RollTest.DiceVDice)
-                                    firstSide
-                            Result.map
-                                (fun firstPool -> 
-                                {
-                                    ParsedSymbolsDiceAndTests.ParsedDice = symbolsDiceAndTests.ParsedDice
-                                    ParsedSymbolsDiceAndTests.ParsedSymbols = symbolsDiceAndTests.ParsedSymbols
-                                    ParsedSymbolsDiceAndTests.ParsedTests = List.append symbolsDiceAndTests.ParsedTests (List.singleton firstPool)
-                                })
-                                toAdd)
-                | _ -> Error ""
-                |> Result.map ParserState.ReadingTests
-                //the right may have one or two elements
-                    //if 1, it must be numeric
-                //for all sides with two elements, first must be a positive int, second must be a die name that matches the list above
-        | _ -> ParserState.Complete
+                                |> RollTest.DiceVDice
+                                |> Ok
+                            | _,_,_,_ ->
+                                Error "Unable to parse test"
+                    | _ -> Error "Left side of test must be a targeted dice pool"
+                let addToTestList test =    
+                    {
+                        ParsedSymbolsDiceAndTests.ParsedSymbols = symbolsDiceAndTests.ParsedSymbols
+                        ParsedSymbolsDiceAndTests.ParsedDice = symbolsDiceAndTests.ParsedDice
+                        ParsedSymbolsDiceAndTests.ParsedTests = 
+                            List.append symbolsDiceAndTests.ParsedTests (List.singleton test)
+                    }
+                    |> ParserState.ReadingTests
+                Result.map addToTestList newTest
+        | _ -> 
+            {
+                DiceProfile.Name = profileName
+                DiceProfile.Dice = symbolsDiceAndTests.ParsedDice
+                DiceProfile.Symbols = symbolsDiceAndTests.ParsedSymbols
+                DiceProfile.Tests = symbolsDiceAndTests.ParsedTests
+            } 
+            |> ParserState.Complete
+            |> Ok
 
     let private ParseNextState profileName state (line:string) =
         let trimmed = line.Trim()
@@ -329,11 +342,11 @@ module Profile =
             | ReadingSymbols symbols -> 
                 ReadSymbols trimmed symbols
             | ReadingDiceName symbolsAndDice -> 
-                ReadDiceName trimmed symbolsAndDice profileName
+                ReadDiceName trimmed symbolsAndDice
             | ReadingDiceSides symbolsAndDiceName ->
                 ReadDice trimmed symbolsAndDiceName
             | ReadingTests symbolsDiceAndTests ->
-                ReadTest trimmed symbolsDiceAndTests
+                ReadTest trimmed symbolsDiceAndTests profileName
             | Complete _ ->
                 Error "Invalid state")
             state
