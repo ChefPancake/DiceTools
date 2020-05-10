@@ -42,7 +42,7 @@ type public DieViewModel() =
             | Some symbols ->
                 NonEmptyList.groupBy id symbols
                 |> NonEmptyList.map (fun (symbol, symbols) -> 
-                    String.Format("{0}{1}", NonEmptyList.length symbols |> countString, Symbol.Value symbol))
+                    String.Format("{0}{1}", NonEmptyList.length symbols |> countString, Symbol.Value symbol |> NonEmptyString100.Value))
                 |> NonEmptyList.toSeq
                 |> String.concat "; "
 
