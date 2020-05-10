@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="UserCommand.fs" />
+    <Compile Include="ViewModels.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DiceCalculator.Domain\DiceCalculator.Domain.fsproj" />
+    <ProjectReference Include="..\DiceCalculator.Profiles\DiceCalculator.Profiles.fsproj" />
+    <ProjectReference Include="..\DiceCalculator.Rolls\DiceCalculator.Rolls.fsproj" />
+    <ProjectReference Include="..\DiceCalculator.Storage\DiceCalculator.Storage.fsproj" />
+  </ItemGroup>
+
+</Project>

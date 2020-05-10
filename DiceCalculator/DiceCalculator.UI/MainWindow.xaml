@@ -1,0 +1,49 @@
+﻿<Window x:Class="DiceCalculator.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DiceCalculator.UI"
+        xmlns:vm="clr-namespace:DiceCalculator.Application.ViewModels;assembly=DiceCalculator.Application"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <StackPanel>
+        <Menu>
+            <MenuItem Header="File">
+                <MenuItem Header="New"/>
+                <MenuItem Header="Open..." Command="{Binding LoadCommand}"/>
+                <MenuItem Header="Save"/>
+                <MenuItem Header="Save as..."/>
+            </MenuItem>
+        </Menu>
+        <TabControl ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile, Mode=TwoWay}">
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <WrapPanel>
+                        <TextBlock Text="{Binding ProfileName}" Margin="5,2"/>
+                        <Button Width="15" Height="15" VerticalAlignment="Center" BorderThickness="0" Content="X" VerticalContentAlignment="Center" FontSize="8"/>
+                    </WrapPanel>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+            <TabControl.ContentTemplate>
+                <DataTemplate DataType="{x:Type vm:DiceProfileViewModel}">
+                    <DockPanel>
+                        <ListBox DockPanel.Dock="Top" ItemsSource="{Binding Symbols}" />
+                        <ListBox DockPanel.Dock="Top" ItemsSource="{Binding Dice}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+        </TabControl>
+        
+    </StackPanel>
+</Window>

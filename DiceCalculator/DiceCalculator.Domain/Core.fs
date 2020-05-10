@@ -52,6 +52,12 @@ module Core =
             match List.filter chooser items with
             | [] -> None
             | chosen -> NonEmptyList chosen |> Some
+        let groupBy projection (NonEmptyList list) =
+            List.groupBy projection list
+            |> List.map (fun (a,b) -> (a, NonEmptyList b))
+            |> NonEmptyList
+        let toSeq (NonEmptyList list) = 
+            List.toSeq list
 
     type NonEmptyString100 = private NonEmptyString100 of string
     module NonEmptyString100 = 
