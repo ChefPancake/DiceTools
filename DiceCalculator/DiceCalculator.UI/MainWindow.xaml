@@ -10,9 +10,40 @@
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
-    
+
     <StackPanel>
-        <ListBox ItemsSource="{Binding Symbols}" />
-        <Button Content="Load" Command="{Binding LoadCommand}" />
+        <Menu>
+            <MenuItem Header="File">
+                <MenuItem Header="New"/>
+                <MenuItem Header="Open..." Command="{Binding LoadCommand}"/>
+                <MenuItem Header="Save"/>
+                <MenuItem Header="Save as..."/>
+            </MenuItem>
+        </Menu>
+        <TabControl ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile, Mode=TwoWay}">
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <WrapPanel>
+                        <TextBlock Text="{Binding ProfileName}" Margin="5,2"/>
+                        <Button Width="15" Height="15" VerticalAlignment="Center" BorderThickness="0" Content="X" VerticalContentAlignment="Center" FontSize="8"/>
+                    </WrapPanel>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+            <TabControl.ContentTemplate>
+                <DataTemplate DataType="{x:Type vm:DiceProfileViewModel}">
+                    <DockPanel>
+                        <ListBox DockPanel.Dock="Top" ItemsSource="{Binding Symbols}" />
+                        <ListBox DockPanel.Dock="Top" ItemsSource="{Binding Dice}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+        </TabControl>
+        
     </StackPanel>
 </Window>
